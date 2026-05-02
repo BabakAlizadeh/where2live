@@ -5,13 +5,9 @@ st.set_page_config(page_title="Texas ZIP Living Score", layout="wide")
 
 st.title("Texas ZIP Living Score")
 st.write("Find Texas ZIP codes that best match your housing and lifestyle preferences.")
-st.info(f"Currently showing results for: **{selected_metro}**")
-
 
 # Load data
 df = pd.read_csv("texas_zip_acs_scores_v0.csv")
-
-# Clean ZIP as text
 df["zip"] = df["zip"].astype(str).str.zfill(5)
 
 # Sidebar inputs
@@ -29,7 +25,10 @@ selected_metro = st.sidebar.selectbox(
     "Select your target metro area",
     list(metro_options.keys())
 )
+
 st.info(f"Currently showing results for: **{selected_metro}**")
+
+
 
 max_rent = st.sidebar.number_input(
     "Maximum median rent you prefer ($)",
