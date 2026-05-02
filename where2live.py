@@ -5,6 +5,8 @@ st.set_page_config(page_title="Texas ZIP Living Score", layout="wide")
 
 st.title("Texas ZIP Living Score")
 st.write("Find Texas ZIP codes that best match your housing and lifestyle preferences.")
+st.info(f"Currently showing results for: **{selected_metro}**")
+
 
 # Load data
 df = pd.read_csv("texas_zip_acs_scores_v0.csv")
@@ -14,6 +16,20 @@ df["zip"] = df["zip"].astype(str).str.zfill(5)
 
 # Sidebar inputs
 st.sidebar.header("Your Preferences")
+
+metro_options = {
+    "Dallas-Fort Worth": ["750", "751", "752", "760", "761", "762"],
+    "Austin": ["786", "787"],
+    "Houston": ["770", "773", "774", "775"],
+    "San Antonio": ["780", "781", "782"],
+    "All Texas": ["75", "76", "77", "78", "79"]
+}
+
+selected_metro = st.sidebar.selectbox(
+    "Select your target metro area",
+    list(metro_options.keys())
+)
+st.info(f"Currently showing results for: **{selected_metro}**")
 
 max_rent = st.sidebar.number_input(
     "Maximum median rent you prefer ($)",
@@ -37,13 +53,21 @@ income_weight = st.sidebar.slider("Area income level importance", 0, 5, 3)
 
 top_n = st.sidebar.slider("How many ZIP codes to show?", 5, 50, 10)
 
-# Filter by budget
+# Filter by selected metro area
 filtered = df.copy()
 
+selected_prefixes = metro_options[selected_metro]
+
+filtered = filtered[
+    filtered["zip"].astype(str).str.zfill(5).str.startswith(tuple(selected_prefixes))
+]
+
+# Filter by budget
 filtered = filtered[
     (filtered["median_rent"] <= max_rent) &
     (filtered["median_home_value"] <= max_home_value)
 ]
+
 
 # Avoid division by zero
 total_weight = rent_weight + home_weight + income_weight
